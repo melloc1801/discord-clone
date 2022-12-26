@@ -3,3 +3,6 @@
 
 cd server
 npx lint-staged && npm run build
+
+cd ../client
+npx lint-staged && npm run build
