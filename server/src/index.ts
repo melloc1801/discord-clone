@@ -10,4 +10,4 @@ app.use(express.json());
 app.use('/api', router);
 
 app.listen(Number(process.env.PORT), () => {});
-console.log(`Server is running at https://localhost:${process.env.PORT}`);
+console.log(`Server is running at http://localhost:${process.env.PORT}`);
