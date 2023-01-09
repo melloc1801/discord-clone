@@ -6,3 +6,101 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserStatus {
+  ONLINE
+  IDLE
+  DND
+  OFFLINE
+}
+
+enum FriendshipStatusEnum {
+  REQUESTED
+  ACCEPTED
+  DECLINED
+  BLOCKED
+}
+
+enum ChatTypeEnum {
+  DIRECT
+  GROUP
+  SERVER
+}
+
+enum ChatRoleEnum {
+  MEMBER
+  ADMIN
+}
+
+model User {
+  id           Int        @default(autoincrement()) @id
+  username     String
+  outerId      Int
+  email        String     @unique()
+  password     String
+  avatarUrl    String
+  isConfirmed  Boolean    @default(false)
+  onlineStatus UserStatus
+  refreshToken String
+
+  chatsOwner Chat[]
+  messages   Message[]
+  chats      Member[]
+
+  friendsOnUser Friendship[] @relation(name: "addressee")
+  userOnFriend  Friendship[] @relation(name: "requester")
+
+  @@unique([username, outerId])
+}
+
+model Friendship {
+  requester   User                 @relation(name: "requester", fields: [requesterId], references: [id])
+  requesterId Int
+  addressee   User                 @relation(name: "addressee", fields: [addresseeId], references: [id])
+  addresseeId Int
+  status      FriendshipStatusEnum
+
+  @@id([requesterId, addresseeId])
+}
+
+model Chat {
+  id        Int          @default(autoincrement()) @id
+  name      String       @unique()
+  avatarUrl String
+  owner     User         @relation(fields: [ownerId], references: [id])
+  ownerId   Int
+  type      ChatTypeEnum
+
+  textChannels TextChannel[]
+  members      Member[]
+}
+
+model Member {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  chat   Chat @relation(fields: [chatId], references: [id])
+  chatId Int
+
+  @@id([userId, chatId])
+}
+
+model TextChannel {
+  id     Int    @default(autoincrement()) @id
+  name   String
+  chat   Chat   @relation(fields: [chatId], references: [id])
+  chatId Int
+
+  messages Message[]
+}
+
+model Message {
+  id        Int      @default(autoincrement()) @id
+  text      String
+  createdAt DateTime
+  isUpdated Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  textChannel   TextChannel @relation(fields: [textChannelId], references: [id])
+  textChannelId Int
+}
