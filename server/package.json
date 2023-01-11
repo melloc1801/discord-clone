@@ -78,8 +78,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "npx prettier --write",
-      "../node_modules/.bin/eslint --max-warnings=0"
+      "../node_modules/.bin/eslint --max-warnings=0",
+      "npx prettier --write"
     ]
   }
 }
