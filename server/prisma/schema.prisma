@@ -37,10 +37,10 @@ model User {
   username     String
   outerId      Int
   email        String     @unique()
-  password     String
-  avatarUrl    String
+  passwordHash String
+  avatarUrl    String?
   isConfirmed  Boolean    @default(false)
-  onlineStatus UserStatus
+  onlineStatus UserStatus @default(OFFLINE)
   refreshToken String
 
   chatsOwner Chat[]

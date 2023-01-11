@@ -23,8 +23,15 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/mapped-types": "^1.2.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^9.2.1",
+    "@nestjs/websockets": "^9.2.1",
     "@prisma/client": "^4.8.1",
+    "bcrypt": "^5.1.0",
+    "cache-manager": "^5.1.4",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },
@@ -68,5 +75,11 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npx prettier --write",
+      "../node_modules/.bin/eslint --max-warnings=0"
+    ]
   }
 }
