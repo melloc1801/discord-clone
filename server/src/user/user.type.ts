@@ -1,0 +1,6 @@
+export enum USER_ACTIVITY_STATUS {
+  ONLINE = 'ONLINE',
+  IDLE = 'IDLE',
+  DND = 'DND',
+  OFFLINE = 'OFFLINE',
+}

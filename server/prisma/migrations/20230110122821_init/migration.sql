@@ -16,10 +16,10 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "outerId" INTEGER NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "avatarUrl" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
+    "avatarUrl" TEXT,
     "isConfirmed" BOOLEAN NOT NULL DEFAULT false,
-    "onlineStatus" "UserStatus" NOT NULL,
+    "onlineStatus" "UserStatus" NOT NULL DEFAULT 'OFFLINE',
     "refreshToken" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
