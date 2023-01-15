@@ -1,18 +1,17 @@
-import { CacheModule, Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { USER_INTERFACES_MAPPING } from '../user/user.constant';
+import { AUTH_INTERFACES_MAPPING } from './auth.constants';
 import { PrismaService } from '../prisma.service';
-import { USER_INTERFACES_MAPPING } from './user.constant';
-import { JwtService } from '@nestjs/jwt';
-import { AUTH_INTERFACES_MAPPING } from '../auth/auth.constants';
-import { AuthService } from '../auth/auth.service';
 import { CONFIRMATION_INTERFACES_MAPPING } from '../confirmation-token/confirmation-token.constants';
 import { ConfirmationTokenService } from '../confirmation-token/confirmation-token.service';
-import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [CacheModule.register(), AuthModule],
-  controllers: [UserController],
+  imports: [JwtModule.register({})],
+  controllers: [AuthController],
   providers: [
     PrismaService,
     JwtService,
@@ -30,4 +29,4 @@ import { AuthModule } from '../auth/auth.module';
     },
   ],
 })
-export class UserModule {}
+export class AuthModule {}
