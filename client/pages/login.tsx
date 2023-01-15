@@ -35,7 +35,7 @@ export default function Login() {
           Need an account?
           <Link
             className="inline-block text-discord-blue-400 ml-1 hover:underline font-medium"
-            href="/signup"
+            href="/register"
           >
             Register
           </Link>
