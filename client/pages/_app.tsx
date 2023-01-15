@@ -7,29 +7,36 @@ const ggSans = localFont({
     {
       path: '../assets/fonts/ggsans/ggsans-Normal.woff2',
       weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../assets/fonts/ggsans/ggsans-NormalItalic.woff2',
+      weight: '400',
+      style: 'italic',
     },
     {
       path: '../assets/fonts/ggsans/ggsans-Medium.woff2',
       weight: '500',
+      style: 'normal',
     },
     {
       path: '../assets/fonts/ggsans/ggsans-Semibold.woff2',
       weight: '600',
+      style: 'normal',
     },
     {
       path: '../assets/fonts/ggsans/ggsans-Bold.woff2',
       weight: '700',
-    },
-    {
-      path: '../assets/fonts/ggsans/ggsans-ExtraBold.woff2',
-      weight: '800',
+      style: 'normal',
     },
   ],
+  display: 'swap',
+  variable: '--font-ggsans',
 });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className={ggSans.className}>
+    <div className={`${ggSans.variable} font-sans`}>
       <Component {...pageProps} />
     </div>
   );
