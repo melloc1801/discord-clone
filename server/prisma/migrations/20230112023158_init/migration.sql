@@ -26,6 +26,14 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
+CREATE TABLE "ConfirmationToken" (
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "ConfirmationToken_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
 CREATE TABLE "Friendship" (
     "requesterId" INTEGER NOT NULL,
     "addresseeId" INTEGER NOT NULL,
@@ -82,6 +90,9 @@ CREATE UNIQUE INDEX "User_username_outerId_key" ON "User"("username", "outerId")
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Chat_name_key" ON "Chat"("name");
+
+-- AddForeignKey
+ALTER TABLE "ConfirmationToken" ADD CONSTRAINT "ConfirmationToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_requesterId_fkey" FOREIGN KEY ("requesterId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -2,13 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { USER_ERROR } from './user.error';
-import { plainToClass } from 'class-transformer';
-import { GetUserDto } from './dtos/get-user.dto';
 import * as crypto from 'crypto';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { IUserService } from './user.interfaces';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { GetUserWithPasswordDto } from './dtos/get-user-with-password.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -35,32 +33,27 @@ export class UserService implements IUserService {
     } while (true);
 
     const passwordHash = this.hashPassword(createUserDto.password);
-    const user = await this._prisma.user.create({
+    return this._prisma.user.create({
       data: {
         ...userData,
         outerId: code,
         passwordHash,
         refreshToken,
+        isConfirmed: true,
       },
     });
-
-    return plainToClass(GetUserDto, user);
   }
 
-  async updateProfile(
-    username: string,
-    outerId: number,
-    updateUserDto: UpdateProfileDto,
-  ) {
-    const userWithUsername = await this.getUserByUsername(username, outerId);
-    if (!userWithUsername) {
+  async updateProfile(user: User, updateUserDto: UpdateProfileDto) {
+    const userByEmail = await this.getUserByEmail(user.email);
+    if (!user) {
       throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
     }
 
     if (updateUserDto.username) {
       const userWithNewUsername = await this.getUserByUsername(
         updateUserDto.username,
-        outerId,
+        userByEmail.outerId,
       );
       if (userWithNewUsername) {
         throw new BadRequestException(USER_ERROR.USER_ALREADY_EXISTS);
@@ -68,88 +61,113 @@ export class UserService implements IUserService {
     }
 
     await this._prisma.user.update({
-      where: { username_outerId: { username, outerId } },
+      where: {
+        username_outerId: {
+          username: userByEmail.username,
+          outerId: userByEmail.outerId,
+        },
+      },
       data: { ...updateUserDto },
     });
   }
+
   async changePassword(
-    username: string,
-    outerId: number,
+    user: User,
     { currentPassword, newPassword }: ChangePasswordDto,
   ) {
-    const userWithUsername = await this.getUserOneWithPassword(
-      username,
-      outerId,
-    );
-    if (!userWithUsername) {
+    const userByEmail = await this.getUserByEmail(user.email);
+    if (!userByEmail) {
       throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
     }
 
     const currentPasswordHash = this.hashPassword(currentPassword);
-    if (userWithUsername.passwordHash !== currentPasswordHash) {
+    if (userByEmail.passwordHash !== currentPasswordHash) {
       throw new BadRequestException(USER_ERROR.WRONG_PASSWORD);
     }
 
     const newPasswordHash = this.hashPassword(newPassword);
     await this._prisma.user.update({
-      where: { username_outerId: { username, outerId } },
+      where: {
+        username_outerId: {
+          username: userByEmail.username,
+          outerId: userByEmail.outerId,
+        },
+      },
       data: { passwordHash: newPasswordHash },
     });
   }
 
-  async updateRefreshToken(
-    username: string,
-    outerId: number,
-    refreshToken: string,
-  ) {
-    const user = await this.getUserByUsername(username, outerId);
+  async updateRefreshToken(user: User, refreshToken: string) {
+    const userByEmail = await this.getUserByUsername(
+      user.username,
+      user.outerId,
+    );
     if (!user) {
       throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
     }
 
     await this._prisma.user.update({
-      where: { username_outerId: { username, outerId } },
+      where: {
+        username_outerId: {
+          username: userByEmail.username,
+          outerId: userByEmail.outerId,
+        },
+      },
       data: { refreshToken },
     });
   }
 
   async getUserByUsername(username: string, outerId: number) {
-    const user = this._prisma.user.findFirst({
-      where: { username, outerId },
+    return this._prisma.user.findUnique({
+      where: { username_outerId: { username, outerId } },
     });
-    return plainToClass(GetUserDto, user);
   }
 
-  async getUserOneWithPassword(username: string, outerId: number) {
-    const user = this._prisma.user.findFirst({
-      where: { username, outerId },
+  async getUserByEmail(email: string) {
+    return this._prisma.user.findUnique({
+      where: { email },
     });
-    return plainToClass(GetUserWithPasswordDto, user);
   }
 
-  async confirmUser(username: string, outerId: number) {
-    const user = await this.getUserByUsername(username, outerId);
+  async confirmUser(id: number) {
+    const user = await this._prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
     }
 
     await this._prisma.user.update({
-      where: { username_outerId: { username, outerId } },
+      where: { id },
       data: {
         isConfirmed: true,
       },
     });
   }
 
-  async delete(username: string, outerId: number) {
-    const user = await this.getUserByUsername(username, outerId);
+  async delete(user: User) {
+    const userByEmail = await this.getUserByEmail(user.email);
     if (!user) {
       throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
     }
 
     await this._prisma.user.delete({
-      where: { username_outerId: { username, outerId } },
+      where: {
+        username_outerId: {
+          username: userByEmail.username,
+          outerId: userByEmail.outerId,
+        },
+      },
     });
+  }
+
+  async checkPassword(email: string, password: string): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
+    if (!user) {
+      throw new BadRequestException(USER_ERROR.USER_NOT_FOUND);
+    }
+
+    const passwordHash = this.hashPassword(password);
+
+    return passwordHash === user.passwordHash;
   }
 
   private hashPassword(password: string) {

@@ -16,12 +16,6 @@ export class UpdateProfileDto {
   username: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(32)
-  @IsOptional()
-  password: string;
-
-  @IsString()
   @IsUrl()
   @IsOptional()
   avatarUrl: string;
